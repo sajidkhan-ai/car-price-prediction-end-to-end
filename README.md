@@ -14,13 +14,13 @@ This project includes:
 
 End-to-End Deployment Structure
 
-Preprocessing & model training (Colab Notebook)
+  .Preprocessing & model training (Colab Notebook)
 
-Trained ML model saved as .pkl
+  .Trained ML model saved as .pkl
 
-FastAPI backend for prediction
+  .FastAPI backend for prediction
 
-Modern frontend built with HTML, CSS & JavaScript
+  .Modern frontend built with HTML, CSS & JavaScript
 
 Fast Response API
 
