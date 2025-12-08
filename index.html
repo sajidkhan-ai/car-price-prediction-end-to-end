@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Price Predictor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚗 Car Price Predictor</h1>
+        <p class="subtitle">Get instant predictions for your car's selling price</p>
+
+        <div class="api-config">
+            <label for="apiUrl">API URL:</label>
+            <input type="text" id="apiUrl" value="http://localhost:8000" placeholder="Enter your API URL">
+            <div class="input-hint">Default: http://localhost:8000</div>
+        </div>
+
+        <form id="predictionForm">
+            <div class="form-group">
+                <label for="year">Manufacturing Year</label>
+                <input type="number" id="year" name="year" required min="1990" max="2025">
+                <div class="input-hint">Year the car was manufactured</div>
+            </div>
+
+            <div class="form-group">
+                <label for="present_price">Current Showroom Price (in Lacs)</label>
+                <input type="number" id="present_price" name="present_price" step="0.1" required min="0">
+                <div class="input-hint">Current market price in lacs (e.g., 5.5)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="kms_driven">Kilometers Driven</label>
+                <input type="number" id="kms_driven" name="kms_driven" required min="0">
+                <div class="input-hint">Total distance covered by the car</div>
+            </div>
+
+            <div class="form-group">
+                <label for="fuel_type">Fuel Type</label>
+                <select id="fuel_type" name="fuel_type" required>
+                    <option value="">Select Fuel Type</option>
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="CNG">CNG</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="seller_type">Seller Type</label>
+                <select id="seller_type" name="seller_type" required>
+                    <option value="">Select Seller Type</option>
+                    <option value="Dealer">Dealer</option>
+                    <option value="Individual">Individual</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="transmission">Transmission</label>
+                <select id="transmission" name="transmission" required>
+                    <option value="">Select Transmission</option>
+                    <option value="Manual">Manual</option>
+                    <option value="Automatic">Automatic</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="owner">Owner Type</label>
+                <select id="owner" name="owner" required>
+                    <option value="">Select Owner Type</option>
+                    <option value="First Owner">First Owner</option>
+                    <option value="Second Owner">Second Owner</option>
+                    <option value="Third Owner or Above">Third Owner or Above</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">Predict Price</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #666;">Calculating price...</p>
+        </div>
+
+        <div class="result-container" id="resultContainer">
+            <div class="result-label">Predicted Selling Price</div>
+            <div class="result-value">₹<span id="predictionValue">0</span></div>
+            <div class="result-subtext">Lacs (Indian Rupees)</div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('predictionForm');
+        const loading = document.getElementById('loading');
+        const resultContainer = document.getElementById('resultContainer');
+        const errorMessage = document.getElementById('errorMessage');
+        const predictionValue = document.getElementById('predictionValue');
+        const submitBtn = document.getElementById('submitBtn');
+        const apiUrlInput = document.getElementById('apiUrl');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Hide previous results/errors
+            resultContainer.classList.remove('show');
+            errorMessage.classList.remove('show');
+            loading.classList.add('show');
+            submitBtn.disabled = true;
+
+            // Collect form data
+            const formData = {
+                year: parseInt(document.getElementById('year').value),
+                present_price: parseFloat(document.getElementById('present_price').value),
+                kms_driven: parseInt(document.getElementById('kms_driven').value),
+                fuel_type: document.getElementById('fuel_type').value,
+                seller_type: document.getElementById('seller_type').value,
+                transmission: document.getElementById('transmission').value,
+                owner: document.getElementById('owner').value
+            };
+
+            try {
+                const apiUrl = apiUrlInput.value.trim() || 'http://localhost:8000';
+                const response = await fetch(`${apiUrl}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Display result
+                predictionValue.textContent = data.prediction.toFixed(2);
+                resultContainer.classList.add('show');
+
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.textContent = `Error: ${error.message}. Please check if the API is running and the URL is correct.`;
+                errorMessage.classList.add('show');
+            } finally {
+                loading.classList.remove('show');
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Add some default values for testing
+        document.getElementById('year').value = 2015;
+        document.getElementById('present_price').value = 5.5;
+        document.getElementById('kms_driven').value = 27000;
+    </script>
+</body>
+
+</html>
